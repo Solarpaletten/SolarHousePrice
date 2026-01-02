@@ -98,7 +98,7 @@ export async function GET(
     const response = {
       house,
       estimate,
-      listings: listings.map((l: any) // fixed type => ({
+      listings: listings.map((l) => ({
         id: l.id,
         type: l.listingType,
         price: Number(l.price),
