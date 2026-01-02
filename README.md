@@ -39,3 +39,5 @@ git push
 
 "fix: add type for listings map parameter"
 git commit -m "pnpm run build"
+
+ix: delete txt correct packageManager field
