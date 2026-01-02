@@ -1,0 +1,25 @@
+{
+  "name": "solar-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @solar/map-core dev",
+    "dev:listing": "pnpm --filter @solar/listing-portal dev",
+    "dev:all": "pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "db:generate": "pnpm --filter @solar/db generate",
+    "db:migrate:dev": "pnpm --filter @solar/db migrate:dev",
+    "db:migrate:deploy": "pnpm --filter @solar/db migrate:deploy",
+    "db:studio": "pnpm --filter @solar/db studio",
+    "osm:import": "tsx packages/geo/src/osm-import.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

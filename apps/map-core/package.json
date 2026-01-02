@@ -1,0 +1,26 @@
+{
+  "name": "@solar/map-core",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@solar/db": "workspace:*",
+    "@solar/geo": "workspace:*",
+    "mapbox-gl": "^3.4.0",
+    "next": "14.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@types/geojson": "^7946.0.14",
+    "typescript": "^5.4.0"
+  }
+}
