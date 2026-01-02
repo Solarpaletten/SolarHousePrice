@@ -2,7 +2,7 @@
 
 import mapboxgl from 'mapbox-gl';
 import { useEffect, useRef } from 'react';
-import type { PopupData } from '../../../../packages/geo/src/types';
+import type { PopupData } from './types';
 
 // ============================================================
 // POPUP COMPONENT
