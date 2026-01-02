@@ -1,97 +1,190 @@
-# Listing Portal
+# 📝 Listing Portal
 
-Lightweight property listing submission site.
+Property listing submission application.
 
-## Purpose
-
-Allow anyone to list a property for rent or sale in under 60 seconds, without registration or payment.
-
-## Tech Stack
-
-- Next.js 14 (App Router)
-- React 18
-- TypeScript
-- CSS Modules
-- Prisma (via @solar/db)
+---
 
 ## Features
 
-- ✅ 3-step form (Address → Type → Details)
-- ✅ No registration required
-- ✅ Instant publish
-- ✅ Listings visible on map-core
+- 📍 3-step submission form
+- 🗺️ Map-based location picker
+- ✅ Form validation (Zod)
+- 📧 Contact information capture
 
-## UX Flow
+---
 
-1. **Step 1 — Address**: Enter property location
-2. **Step 2 — Type**: Choose Rent or Sale
-3. **Step 3 — Details**: Price, email, phone, description
-4. **Success**: Confirmation + link to map
+## Quick Start
 
-## Structure
+```bash
+# From monorepo root
+pnpm --filter @solar/listing-portal dev
 
-```
-/listing-portal
-├── app/
-│   ├── api/
-│   │   └── listing/route.ts    # POST /api/listing
-│   ├── layout.tsx
-│   └── page.tsx                # Main form page
-├── components/
-│   ├── ListingForm.tsx         # Form component
-│   ├── ListingForm.module.css  # Styles
-│   ├── types.ts                # TypeScript types
-│   └── index.ts                # Exports
-├── .env.example
-├── next.config.mjs
-├── tsconfig.json
-└── package.json
+# Or directly
+cd apps/listing-portal
+pnpm dev
 ```
 
-## API
+Open http://localhost:3001
+
+---
+
+## Environment Variables
+
+Create `.env` file:
+
+```env
+# Required
+DATABASE_URL="postgresql://user:pass@host:port/database"
+NEXT_PUBLIC_MAPBOX_TOKEN="pk.eyJ1..."
+```
+
+---
+
+## Form Steps
+
+### Step 1: Address
+
+- Street
+- House number
+- City
+- Postal code
+- Location picker (map)
+
+### Step 2: Property Details
+
+- Listing type (rent/sale)
+- Price
+- Number of rooms
+- Area (sqm)
+- Building type
+- Description
+
+### Step 3: Contact
+
+- Name
+- Email
+- Phone (optional)
+- Submission confirmation
+
+---
+
+## API Route
 
 ### POST /api/listing
 
-Create a new listing.
+Creates new listing.
 
-**Request:**
+**Request Body:**
 ```json
 {
-  "house_id": "uuid | null",
-  "listing_type": "rent | sale",
-  "price": 1200,
-  "contact_email": "user@mail.com",
-  "contact_phone": "+49...",
-  "description": "optional"
+  "address": {
+    "street": "Alexanderplatz",
+    "number": "1",
+    "city": "Berlin",
+    "postcode": "10178",
+    "coordinates": [13.41, 52.52]
+  },
+  "property": {
+    "type": "rent",
+    "price": 1200,
+    "rooms": 3,
+    "areaSqm": 85,
+    "buildingType": "apartments",
+    "description": "..."
+  },
+  "contact": {
+    "name": "Max Mustermann",
+    "email": "max@example.com",
+    "phone": "+49..."
+  }
 }
 ```
 
 **Response:**
 ```json
-{ "status": "ok" }
+{
+  "success": true,
+  "listingId": "uuid"
+}
 ```
 
-**Validation:**
-- `contact_email` — required, valid format
-- `price` — required, > 0
-- `listing_type` — must be "rent" or "sale"
+---
 
-## Environment Variables
+## Project Structure
+
+```
+apps/listing-portal/
+├── app/
+│   ├── page.tsx              # Main form
+│   ├── layout.tsx
+│   └── api/
+│       └── listing/
+│           └── route.ts      # POST endpoint
+├── components/
+│   ├── ListingForm.tsx       # Multi-step form
+│   ├── AddressStep.tsx
+│   ├── DetailsStep.tsx
+│   ├── ContactStep.tsx
+│   └── LocationPicker.tsx    # Map component
+├── lib/
+│   └── validation.ts         # Zod schemas
+└── package.json
+```
+
+---
+
+## Validation
+
+Using Zod for form validation:
+
+```typescript
+const listingSchema = z.object({
+  address: z.object({
+    street: z.string().min(1),
+    number: z.string().min(1),
+    city: z.string().min(1),
+    postcode: z.string().regex(/^\d{5}$/),
+  }),
+  property: z.object({
+    type: z.enum(['rent', 'sale']),
+    price: z.number().positive(),
+    rooms: z.number().int().positive().optional(),
+    areaSqm: z.number().positive().optional(),
+  }),
+  contact: z.object({
+    name: z.string().min(1),
+    email: z.string().email(),
+    phone: z.string().optional(),
+  }),
+});
+```
+
+---
+
+## Development
 
 ```bash
-DATABASE_URL=postgresql://localhost:5432/solar_dev
+# Start dev server
+pnpm dev
+
+# Build
+pnpm build
+
+# Type check
+pnpm typecheck
 ```
 
-## Running Locally
+---
 
-```bash
-# From monorepo root
-pnpm install
-pnpm --filter @solar/listing-portal dev
+## Integration
 
-# Open http://localhost:3001
-```
+Listing Portal creates records in `listings` table.
 
-## Status
+If coordinates are provided, the system attempts to:
+1. Find existing house by point
+2. Link listing to house
+3. Or create orphan listing (house_id = null)
 
-✅ Phase 3A Complete — Listing Portal MVP
+---
+
+*Part of SolarHousePrice monorepo*

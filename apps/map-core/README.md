@@ -1,78 +1,239 @@
-# Map Core
+# 🗺️ Map Core
 
-Main map application — the heart of the platform.
+Main application — interactive 3D map with real building data.
 
-## Tech Stack
+---
 
-- Next.js 14 (App Router)
-- React 18
-- TypeScript
-- Mapbox GL JS
+## Features
 
-## Features (Phase 2)
+- 🛰️ Satellite view with 3D building extrusion
+- 🏗️ 500+ real building footprints
+- 💰 Price estimates on click
+- 🖱️ Hover & click interactions
+- 📱 Responsive design
 
-- ✅ Interactive map (Mapbox)
-- ✅ Building polygons from API
-- ✅ Hover highlighting
-- ✅ Click → popup with details
-- ✅ Price estimate display (mock)
+---
 
-## Structure
-
-```
-/map-core
-├── app/
-│   ├── api/
-│   │   ├── houses/route.ts      # GET houses in bbox
-│   │   └── house/[id]/route.ts  # GET house details
-│   ├── layout.tsx
-│   └── page.tsx                 # Main map page
-├── components/
-│   └── map/
-│       ├── MapView.tsx          # Map container
-│       ├── useMapbox.ts         # Map logic hook
-│       ├── Popup.tsx            # Info popup
-│       ├── layers.ts            # Layer definitions
-│       └── types.ts             # TypeScript types
-├── .env.example
-├── next.config.mjs
-├── tsconfig.json
-└── package.json
-```
-
-## API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/houses?bbox=w,s,e,n` | GET | Houses in viewport (GeoJSON) |
-| `/api/house/[id]` | GET | House details + price estimate |
-
-## Environment Variables
-
-```bash
-# Required
-NEXT_PUBLIC_MAPBOX_TOKEN=pk.xxx
-DATABASE_URL=postgresql://localhost:5432/solar_dev
-```
-
-## Running Locally
+## Quick Start
 
 ```bash
 # From monorepo root
-pnpm install
-pnpm --filter @solar/map-core dev
+pnpm dev
 
-# Open http://localhost:3000
+# Or directly
+cd apps/map-core
+pnpm dev
 ```
 
-## Map Behavior
+Open http://localhost:3000
 
-1. Map loads centered on Berlin (hardcoded for MVP)
-2. Zoom in to level 14+ to see buildings
-3. Buildings load automatically on pan/zoom
-4. Hover → building highlights
-5. Click → popup with address + price estimate
+---
 
-## Status
+## Environment Variables
 
-✅ Phase 2 Complete — Map Integration
+Create `.env` file:
+
+```env
+# Required
+DATABASE_URL="postgresql://user:pass@host:port/database"
+NEXT_PUBLIC_MAPBOX_TOKEN="pk.eyJ1..."
+
+# Optional
+PRISMA_LOG_QUERIES=true
+```
+
+### Getting Mapbox Token
+
+1. Sign up at [mapbox.com](https://www.mapbox.com/)
+2. Go to Account → Access Tokens
+3. Create new token (default scopes)
+4. Copy token starting with `pk.`
+
+---
+
+## Project Structure
+
+```
+apps/map-core/
+├── app/
+│   ├── page.tsx              # Main page
+│   ├── layout.tsx            # Root layout
+│   └── api/
+│       ├── houses/
+│       │   └── route.ts      # GET houses by bbox
+│       └── house/
+│           └── [id]/
+│               └── route.ts  # GET single house
+├── components/
+│   └── map/
+│       ├── MapView.tsx       # React map component
+│       ├── useMapbox.ts      # Map logic hook
+│       ├── layers.ts         # Mapbox layer config
+│       ├── Popup.tsx         # Info popup
+│       ├── types.ts          # TypeScript types
+│       └── index.ts          # Exports
+├── .env                      # Environment (gitignored)
+├── .env.example              # Template
+└── package.json
+```
+
+---
+
+## API Routes
+
+### GET /api/houses
+
+Returns buildings within bounding box as GeoJSON.
+
+**Query Parameters:**
+- `bbox` — `west,south,east,north` (required)
+- `limit` — max results (default: 1000)
+
+**Example:**
+```
+GET /api/houses?bbox=13.40,52.515,13.42,52.525
+```
+
+**Response:**
+```json
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Polygon", "coordinates": [...] },
+      "properties": {
+        "id": "uuid",
+        "osmId": 12345,
+        "address": { "street": "...", ... },
+        "building": { "type": "residential", "levels": 4 }
+      }
+    }
+  ]
+}
+```
+
+### GET /api/house/[id]
+
+Returns single house with price estimate.
+
+**Example:**
+```
+GET /api/house/550e8400-e29b-41d4-a716-446655440000
+```
+
+**Response:**
+```json
+{
+  "house": { ... },
+  "estimate": {
+    "rentMin": 800,
+    "rentMax": 1200,
+    "saleMin": 280000,
+    "saleMax": 420000
+  },
+  "listings": []
+}
+```
+
+---
+
+## Map Configuration
+
+### View Settings
+
+| Setting | Value |
+|---------|-------|
+| Initial center | Berlin (13.405, 52.52) |
+| Initial zoom | 15 |
+| Min zoom for data | 14 |
+| 3D threshold | 15 |
+
+### Map Style
+
+```typescript
+style: 'mapbox://styles/mapbox/satellite-streets-v12'
+```
+
+### 3D Layer
+
+Activates at zoom ≥ 15:
+- Pitch: 55°
+- Building height: `levels × 3m`
+- Opacity: 0.35 (normal), 0.55 (hover)
+
+---
+
+## Dependencies
+
+```json
+{
+  "dependencies": {
+    "next": "14.2.0",
+    "react": "18.2.0",
+    "mapbox-gl": "^3.0.0",
+    "@solar/db": "workspace:*",
+    "@solar/geo": "workspace:*"
+  }
+}
+```
+
+---
+
+## Development
+
+```bash
+# Start dev server
+pnpm dev
+
+# Build
+pnpm build
+
+# Type check
+pnpm typecheck
+
+# Lint
+pnpm lint
+```
+
+---
+
+## Deployment
+
+### Vercel
+
+1. Connect GitHub repo
+2. Set root directory: `apps/map-core`
+3. Framework: Next.js
+4. Add environment variables
+5. Deploy
+
+### Environment on Vercel
+
+| Variable | Required |
+|----------|----------|
+| `NEXT_PUBLIC_MAPBOX_TOKEN` | ✅ |
+| `DATABASE_URL` | ✅ |
+
+---
+
+## Troubleshooting
+
+### Map doesn't load
+- Check `NEXT_PUBLIC_MAPBOX_TOKEN`
+- Verify token in Mapbox dashboard
+- Check browser console
+
+### No buildings visible
+- Zoom to level 14+
+- Check API response in Network tab
+- Verify database has data
+
+### 3D not working
+- Zoom to level 15+
+- Check WebGL support
+- Verify `houses3DLayer` is added
+
+---
+
+*Part of SolarHousePrice monorepo*

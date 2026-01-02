@@ -1,78 +1,28 @@
-# Setup Guide
+# 🚀 Setup Guide
+
+Complete guide for setting up SolarHousePrice locally and deploying to production.
+
+---
 
 ## Prerequisites
 
-### Required Software
-
 | Tool | Version | Purpose |
 |------|---------|---------|
-| Node.js | 20 LTS | Runtime |
+| Node.js | 18+ | Runtime |
 | pnpm | 8+ | Package manager |
-| PostgreSQL | 15+ | Database |
-| PostGIS | 3.3+ | Spatial extension |
+| PostgreSQL | 16+ | Database |
+| PostGIS | 3.4+ | Spatial extension |
+| Mapbox | Account | Map tiles & GL |
 
-### Accounts Needed
+---
 
-| Service | Purpose | Required for |
-|---------|---------|--------------|
-| Mapbox | Map tiles & GL JS | map-core |
-
-## Technology Stack
-
-### Frontend
-
-- **Next.js 14** — React framework with App Router
-- **React 18** — UI library
-- **TypeScript** — Type safety
-- **Mapbox GL JS** — Map rendering
-
-### Backend
-
-- **Next.js Route Handlers** — API endpoints
-- **PostgreSQL** — Primary database
-- **PostGIS** — Geospatial queries
-
-### Monorepo
-
-- **pnpm workspaces** — Package management
-- **Turborepo** — Build orchestration (optional)
-
-## Project Structure
-
-```
-/solar-monorepo
-│
-├── /apps
-│   ├── /map-core           # Main map application
-│   │   ├── /app            # Next.js App Router
-│   │   ├── /components     # React components
-│   │   └── /lib            # Utilities
-│   │
-│   └── /listing-portal     # Listing submission site
-│       ├── /app
-│       ├── /components
-│       └── /lib
-│
-├── /packages
-│   ├── /db                 # Database layer
-│   ├── /geo                # Geospatial utilities
-│   ├── /pricing            # Price calculations
-│   └── /ui                 # Shared components
-│
-├── /docs                   # Documentation
-│
-├── pnpm-workspace.yaml     # Workspace config
-├── package.json            # Root package
-└── README.md
-```
-
-## Local Setup Steps
+## Local Development Setup
 
 ### 1. Clone Repository
 
 ```bash
-git clone <repository-url>
-cd solar-monorepo
+git clone https://github.com/Solarpaletten/SolarHousePrice.git
+cd SolarHousePrice
 ```
 
 ### 2. Install Dependencies
@@ -83,106 +33,299 @@ pnpm install
 
 ### 3. Database Setup
 
+#### Option A: Local PostgreSQL
+
 ```bash
+# macOS with Homebrew
+brew install postgresql@16 postgis
+
+# Start PostgreSQL
+brew services start postgresql@16
+
 # Create database
-createdb solar_dev
+createdb solar_db
 
 # Enable PostGIS
-psql solar_dev -c "CREATE EXTENSION postgis;"
+psql -d solar_db -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+psql -d solar_db -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"
 ```
 
-### 4. Environment Variables
-
-Create `.env.local` in each app:
-
-**apps/map-core/.env.local**
-```
-DATABASE_URL=postgresql://localhost:5432/solar_dev
-NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token
-```
-
-**apps/listing-portal/.env.local**
-```
-DATABASE_URL=postgresql://localhost:5432/solar_dev
-```
-
-### 5. Run Development Servers
+#### Option B: Docker
 
 ```bash
-# From root - run all apps
-pnpm dev
-
-# Or run specific app
-pnpm --filter map-core dev
-pnpm --filter listing-portal dev
+docker run -d \
+  --name solar-postgres \
+  -e POSTGRES_DB=solar_db \
+  -e POSTGRES_USER=solar_user \
+  -e POSTGRES_PASSWORD=your_password \
+  -p 5432:5432 \
+  postgis/postgis:16-3.4
 ```
 
-### 6. Access Applications
-
-| App | URL |
-|-----|-----|
-| map-core | http://localhost:3000 |
-| listing-portal | http://localhost:3001 |
-
-## Database Migrations
+### 4. Environment Configuration
 
 ```bash
-# Generate Prisma Client
+# Create environment file
+cp apps/map-core/.env.example apps/map-core/.env
+```
+
+Edit `apps/map-core/.env`:
+
+```env
+# Database
+DATABASE_URL="postgresql://solar_user:your_password@localhost:5432/solar_db"
+
+# Mapbox (get from https://account.mapbox.com/access-tokens/)
+NEXT_PUBLIC_MAPBOX_TOKEN="pk.eyJ1Ijoix..."
+```
+
+### 5. Initialize Database
+
+```bash
+# Generate Prisma client
 pnpm db:generate
 
-# Run migrations (development)
-pnpm db:migrate:dev
-
-# Run migrations (production)
-pnpm db:migrate:deploy
-
-# Open Prisma Studio
-pnpm db:studio
+# Push schema to database
+pnpm db:push
 ```
 
-## Common Commands
+### 6. Import Building Data
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start all apps in dev mode |
-| `pnpm build` | Build all packages and apps |
-| `pnpm lint` | Run linting |
-| `pnpm test` | Run tests |
-| `pnpm clean` | Remove build artifacts |
+```bash
+# Import Berlin Alexanderplatz buildings
+pnpm osm:import --city=berlin-alex --limit=500
+```
+
+### 7. Start Development Server
+
+```bash
+pnpm dev
+```
+
+Open http://localhost:3000
+
+---
+
+## Mapbox Setup
+
+### 1. Create Account
+
+1. Go to [mapbox.com](https://www.mapbox.com/)
+2. Sign up (free tier: 50K loads/month)
+3. Navigate to Access Tokens
+
+### 2. Create Token
+
+1. Click "Create a token"
+2. Name: `SolarHousePrice`
+3. Scopes: Default (public)
+4. URL restrictions (production): Add your domain
+5. Copy token starting with `pk.`
+
+### 3. Configure
+
+Add to `.env`:
+```env
+NEXT_PUBLIC_MAPBOX_TOKEN=pk.eyJ1IjoieW91ci11c2VybmFtZSIsImEiOiJj...
+```
+
+---
+
+## OSM Import Tool
+
+### Usage
+
+```bash
+# By city preset
+pnpm osm:import --city=berlin-alex --limit=500
+pnpm osm:import --city=berlin-mitte --limit=300
+pnpm osm:import --city=hamburg-hafencity --limit=200
+pnpm osm:import --city=munich-center --limit=200
+
+# By custom bounding box
+pnpm osm:import --bbox=13.40,52.515,13.42,52.525 --limit=300
+
+# Options
+--limit=N     Maximum buildings to import (default: 500)
+--help        Show help
+```
+
+### City Bounding Boxes
+
+| City | BBox (minLng, minLat, maxLng, maxLat) |
+|------|---------------------------------------|
+| berlin-mitte | 13.38, 52.51, 13.43, 52.53 |
+| berlin-alex | 13.40, 52.515, 13.425, 52.525 |
+| hamburg-hafencity | 9.98, 53.535, 10.02, 53.55 |
+| munich-center | 11.56, 48.13, 11.59, 48.145 |
+
+### Expected Output
+
+```
+🏙️  City: berlin-alex
+
+🏗️  OSM BUILDING IMPORT
+══════════════════════════════════════════════════
+📍 BBox: [13.4, 52.515, 13.425, 52.525]
+📊 Limit: 500
+══════════════════════════════════════════════════
+📡 Fetching from Overpass API...
+   Found 6676 nodes, 539 building ways
+
+✅ Received 539 building features
+📥 Processing...
+
+══════════════════════════════════════════════════
+📊 IMPORT SUMMARY
+══════════════════════════════════════════════════
+   ✅ Imported:  369
+   ⏭️  Skipped:   131
+   ❌ Errors:    0
+   ⏱️  Duration:  101.45s
+══════════════════════════════════════════════════
+```
+
+---
+
+## Production Deployment
+
+### Vercel (Frontend)
+
+#### 1. Install Vercel CLI
+
+```bash
+npm i -g vercel
+```
+
+#### 2. Link Project
+
+```bash
+cd apps/map-core
+vercel link
+```
+
+#### 3. Configure Environment
+
+In Vercel Dashboard → Settings → Environment Variables:
+
+| Variable | Value | Environment |
+|----------|-------|-------------|
+| `NEXT_PUBLIC_MAPBOX_TOKEN` | `pk.xxx` | Production |
+| `DATABASE_URL` | `postgresql://...` | Production |
+
+#### 4. Deploy
+
+```bash
+vercel --prod
+```
+
+Or via GitHub integration:
+1. Connect GitHub repo
+2. Set root directory: `apps/map-core`
+3. Framework preset: Next.js
+4. Auto-deploy on push to `main`
+
+### Database (Digital Ocean)
+
+#### 1. Create Managed Database
+
+1. Digital Ocean → Databases → Create
+2. PostgreSQL 16
+3. Region: Frankfurt (closest to Berlin)
+4. Plan: Basic ($15/month)
+
+#### 2. Enable PostGIS
+
+```bash
+# Connect via psql
+psql "postgresql://doadmin:password@host:25060/defaultdb?sslmode=require"
+
+# Enable extensions
+CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+```
+
+#### 3. Configure Trusted Sources
+
+Add Vercel IP ranges to trusted sources in DO dashboard.
+
+#### 4. Get Connection String
+
+Format:
+```
+postgresql://user:password@host:port/database?sslmode=require
+```
+
+---
 
 ## Troubleshooting
 
-### PostGIS not found
+### Map not loading
+
+1. Check Mapbox token in `.env`
+2. Verify token permissions in Mapbox dashboard
+3. Check browser console for errors
+
+### Database connection failed
+
+1. Verify `DATABASE_URL` format
+2. Check PostgreSQL is running
+3. Verify user permissions
+4. Check firewall/trusted sources (production)
+
+### No buildings displayed
+
+1. Check zoom level (must be ≥ 14)
+2. Verify OSM import completed
+3. Check API response: `GET /api/houses?bbox=...`
+4. Look for PostGIS errors in console
+
+### OSM import fails
+
+1. Check network connectivity
+2. Overpass API may be overloaded (wait 1-2 min)
+3. Reduce bbox size for large areas
+4. Check database connection
+
+### 3D not working
+
+1. Zoom must be ≥ 15
+2. Check browser WebGL support
+3. Verify `houses3DLayer` in console
+
+---
+
+## Useful Commands
 
 ```bash
-# macOS
-brew install postgis
+# Development
+pnpm dev                    # Start dev server
+pnpm build                  # Build for production
+pnpm lint                   # Run linter
 
-# Ubuntu
-sudo apt install postgis postgresql-15-postgis-3
+# Database
+pnpm db:generate            # Generate Prisma client
+pnpm db:push                # Push schema changes
+pnpm db:studio              # Open Prisma Studio
+
+# Data
+pnpm osm:import --help      # Show import options
+
+# Deployment
+vercel                      # Deploy preview
+vercel --prod               # Deploy production
 ```
 
-### Port already in use
+---
 
-```bash
-# Find process
-lsof -i :3000
+## Environment Variables Reference
 
-# Kill process
-kill -9 <PID>
-```
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | ✅ | PostgreSQL connection string |
+| `NEXT_PUBLIC_MAPBOX_TOKEN` | ✅ | Mapbox public access token |
+| `PRISMA_LOG_QUERIES` | ❌ | Enable Prisma query logging |
 
-### pnpm workspace issues
+---
 
-```bash
-# Clear and reinstall
-rm -rf node_modules
-rm pnpm-lock.yaml
-pnpm install
-```
-
-## Notes
-
-- No deployment instructions in MVP phase
-- Production setup documented separately
-- CI/CD configuration pending
+*Last updated: Phase 4A (January 2026)*
