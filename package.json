@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "postinstall": "pnpm db:generate",
     "dev": "pnpm --filter @solar/map-core dev",
     "dev:listing": "pnpm --filter @solar/listing-portal dev",
     "dev:all": "pnpm -r --parallel dev",
