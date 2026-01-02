@@ -30,14 +30,16 @@ model House {
 
 model PriceEstimate {
   id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  houseId      String   @map("house_id") @db.Uuid
-  rentMin      Decimal? @map("rent_min") @db.Decimal(10, 2)
-  rentMax      Decimal? @map("rent_max") @db.Decimal(10, 2)
-  saleMin      Decimal? @map("sale_min") @db.Decimal(12, 2)
-  saleMax      Decimal? @map("sale_max") @db.Decimal(12, 2)
-  confidence   Decimal? @db.Decimal(3, 2)
+  houseId      String   @unique @map("house_id") @db.Uuid
+  
+  priceSqm     Decimal  @map("price_sqm") @db.Decimal(10, 2)
+  priceTotal   Decimal? @map("price_total") @db.Decimal(12, 2)
+  method       String   @db.VarChar(20)
+  confidence   Decimal  @db.Decimal(3, 2)
+  details      Json     @default("{}")
+  
   calculatedAt DateTime @default(now()) @map("calculated_at") @db.Timestamptz
-  factors      Json?
+  expiresAt    DateTime @map("expires_at") @db.Timestamptz
 
   house House @relation(fields: [houseId], references: [id], onDelete: Cascade)
 
@@ -51,6 +53,8 @@ model LightListing {
   houseId      String?   @map("house_id") @db.Uuid
   listingType  String    @map("listing_type") @db.VarChar(20)
   price        Decimal   @db.Decimal(12, 2)
+  areaSqm      Decimal?  @map("area_sqm") @db.Decimal(10, 2)
+  geometry     Unsupported("geometry(Point, 4326)")?
   contactEmail String    @map("contact_email") @db.VarChar(255)
   contactPhone String?   @map("contact_phone") @db.VarChar(50)
   description  String?
@@ -64,4 +68,27 @@ model LightListing {
   @@index([isActive])
   @@index([listingType])
   @@map("light_listings")
+}
+
+model PriceCoefficient {
+  id                String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  district          String    @db.VarChar(100)
+  basePriceSqm      Decimal   @map("base_price_sqm") @db.Decimal(10, 2)
+  factorResidential Decimal   @default(1.0) @map("factor_residential") @db.Decimal(4, 3)
+  factorApartments  Decimal   @default(1.05) @map("factor_apartments") @db.Decimal(4, 3)
+  factorCommercial  Decimal   @default(1.2) @map("factor_commercial") @db.Decimal(4, 3)
+  factorOffice      Decimal   @default(1.15) @map("factor_office") @db.Decimal(4, 3)
+  factorIndustrial  Decimal   @default(0.7) @map("factor_industrial") @db.Decimal(4, 3)
+  factorPerLevel    Decimal   @default(0.02) @map("factor_per_level") @db.Decimal(4, 3)
+  factorCenterKm    Decimal   @default(-0.03) @map("factor_center_km") @db.Decimal(4, 3)
+  factorWater100m   Decimal   @default(0.08) @map("factor_water_100m") @db.Decimal(4, 3)
+  version           Int       @default(1)
+  validFrom         DateTime  @default(now()) @map("valid_from") @db.Timestamptz
+  validTo           DateTime? @map("valid_to") @db.Timestamptz
+  source            String    @db.VarChar(100)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([district, validFrom])
+  @@map("price_coefficients")
 }

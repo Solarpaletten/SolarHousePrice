@@ -85,3 +85,38 @@ First public release with core functionality.
 ---
 
 *Maintained by Solar Team*
+
+## [0.2.0] - 2026-01-02
+
+### Added - Phase 5: Price Estimation
+
+#### New Package: @solar/pricing
+- **Aggregator (Stage A)**: Rule-based price estimation using nearby listings
+- **ML Predictor (Stage B)**: Gradient Boosting model placeholder (ready for training)
+- **Coefficients**: Berlin Alexanderplatz district pricing data
+- **Color Scale**: UI price visualization (cold→warm gradient)
+
+#### New API Endpoint
+- `GET /api/price/estimate?house_id=xxx` - Returns price estimate with confidence score
+
+#### New UI Components
+- `PriceDisplay` - Popup component showing €/m² and total
+- `usePrice` hook - Data fetching for estimates
+
+#### Database Schema
+- `PriceCoefficient` - Versioned district coefficients
+- `PriceEstimate` - Cached estimates (24h TTL)
+
+#### Features
+- District-based base pricing (Berlin: 6,500 €/m²)
+- Building type multipliers (residential, apartments, commercial, office, industrial)
+- Floor level bonuses (+2% per floor above 3)
+- Proximity factors (distance to center penalty)
+- Confidence scoring (50-95%)
+- 24-hour result caching
+
+### Technical
+- TypeScript strict mode
+- Explainable pricing logic
+- No external paid APIs
+- Demo/investor ready
