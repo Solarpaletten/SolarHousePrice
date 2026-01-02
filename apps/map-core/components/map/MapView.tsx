@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMapbox } from './useMapbox';
 import { HousePopup } from './Popup';
+import { PriceToggle, PriceLegend } from './PriceToggle';
+import { usePriceOverlay } from './usePriceOverlay';
 
 // Import Mapbox CSS
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -29,18 +31,25 @@ export function MapView({ accessToken }: MapViewProps) {
     accessToken,
   });
 
+  const {
+    enabled: priceOverlayEnabled,
+    loading: priceLoading,
+    buildingsCount,
+    toggle: togglePriceOverlay,
+  } = usePriceOverlay(map);
+
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       {/* Map container */}
-      <div 
-        ref={containerRef} 
-        style={{ 
+      <div
+        ref={containerRef}
+        style={{
           position: 'absolute',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-        }} 
+        }}
       />
 
       {/* Loading indicator */}
@@ -79,11 +88,18 @@ export function MapView({ accessToken }: MapViewProps) {
       )}
 
       {/* House popup */}
-      <HousePopup 
-        map={map} 
-        data={popupData} 
-        onClose={closePopup} 
+      <HousePopup
+        map={map}
+        data={popupData}
+        onClose={closePopup}
       />
+      <PriceToggle
+        enabled={priceOverlayEnabled}
+        onToggle={togglePriceOverlay}
+        loading={priceLoading}
+        buildingsCount={buildingsCount}
+      />
+      <PriceLegend visible={priceOverlayEnabled} />
     </div>
   );
 }
