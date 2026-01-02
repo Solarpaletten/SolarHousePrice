@@ -37,4 +37,5 @@ git add -A
 git commit -m "fix: type annotation for listings"
 git push
 
-fix: add type for listings map parameter"
+"fix: add type for listings map parameter"
+git commit -m "pnpm run build"
