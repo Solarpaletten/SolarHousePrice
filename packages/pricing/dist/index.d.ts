@@ -5,4 +5,6 @@ export { PriceEngine } from './engine.js';
 export { PRICE_RANGE, PRICE_COLORS, getPriceColor, getPriceColorRGB, getPriceColorRGBA, getMapboxPriceExpression, getPriceCategory, getConfidenceColor, formatPrice, formatPriceSqm, } from './colorScale.js';
 export { MLPredictor } from './ml/predict.js';
 export { extractFeatures, getFeatureNames } from './ml/features.js';
+export { USAPriceAggregator, getUSAPriceColor, USA_LEGEND_ITEMS } from './aggregator-usa';
+export { USA_COEFFICIENTS, getUSACoefficients } from './coefficients-usa';
 //# sourceMappingURL=index.d.ts.map

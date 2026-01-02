@@ -12,7 +12,8 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@solar/db": "workspace:*"
+    "@solar/db": "workspace:*",
+    "@solar/config": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",

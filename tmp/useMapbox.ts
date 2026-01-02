@@ -301,7 +301,6 @@ export function useMapbox({
         buildingType,
         levels,
         estimate: null,
-        listings: [],
         loading: true,
       });
 

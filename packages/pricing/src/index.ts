@@ -53,3 +53,7 @@ export {
 // ML (Stage B)
 export { MLPredictor } from './ml/predict.js';
 export { extractFeatures, getFeatureNames } from './ml/features.js';
+
+// USA Pricing
+export { USAPriceAggregator, getUSAPriceColor, USA_LEGEND_ITEMS } from './aggregator-usa';
+export { USA_COEFFICIENTS, getUSACoefficients } from './coefficients-usa';
