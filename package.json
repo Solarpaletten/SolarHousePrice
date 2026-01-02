@@ -2,6 +2,7 @@
   "name": "solar-monorepo",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@8.15.0",
   "scripts": {
     "dev": "pnpm --filter @solar/map-core dev",
     "dev:listing": "pnpm --filter @solar/listing-portal dev",
@@ -21,6 +22,5 @@
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=8.0.0"
-  },
-  "packageManager": "pnpm@8.15.0"
+  }
 }

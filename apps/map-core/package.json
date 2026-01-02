@@ -2,12 +2,13 @@
   "name": "@solar/map-core",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@8.15.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate --schema=../../packages/db/prisma/schema.prisma"
+    "postinstall": "pnpm prisma generate --schema=../../packages/db/prisma/schema.prisma"
   },
   "dependencies": {
     "@solar/db": "workspace:*",
@@ -23,7 +24,7 @@
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@types/geojson": "^7946.0.14",
-    "typescript": "^5.4.0"
-  },
-  "packageManager": "pnpm@8.15.0"
+    "typescript": "^5.4.0",
+    "prisma": "^5.22.0"
+  }
 }
