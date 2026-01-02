@@ -267,7 +267,7 @@ async function cacheBulkPrices(key: string, data: object): Promise<void> {
   // Cleanup old entries (max 100 cached viewports)
   if (bulkCache.size > 100) {
     const now = Date.now();
-    for (const [k, v] of bulkCache.entries()) {
+    for (const [k, v] of Array.from(bulkCache.entries())) {
       if (v.expiresAt < now) {
         bulkCache.delete(k);
       }
