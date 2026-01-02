@@ -36,3 +36,5 @@ git commit -m "fix: add packageManager for Vercel"
 git add -A
 git commit -m "fix: type annotation for listings"
 git push
+
+fix: add type for listings map parameter"
