@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@solar/db';
 import { prisma } from '@solar/db';
 import type { BBox, HouseFeature, HouseFeatureCollection, HouseProperties } from './types';
 
