@@ -32,3 +32,7 @@ Location-first real estate platform for Germany.
 🟡 Phase 0 — Documentation & Architecture Lock
 
 git commit -m "fix: add packageManager for Vercel"
+
+git add -A
+git commit -m "fix: type annotation for listings"
+git push
