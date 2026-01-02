@@ -225,7 +225,7 @@ function applyPriceColors(
   // Format: ['match', ['get', 'id'], id1, color1, id2, color2, ..., defaultColor]
   const matchExpression: any[] = ['match', ['get', 'id']];
 
-  for (const [houseId, data] of priceMap.entries()) {
+  for (const [houseId, data] of Array.from(priceMap.entries())) {
     matchExpression.push(houseId);
     matchExpression.push(data.color);
   }
@@ -234,7 +234,7 @@ function applyPriceColors(
   matchExpression.push('#888888');
 
   try {
-    map.setPaintProperty(layerId, 'fill-extrusion-color', matchExpression);
+    map.setPaintProperty(layerId, 'fill-extrusion-color', matchExpression as any);
   } catch (error) {
     console.error('Failed to apply price colors:', error);
     
@@ -255,7 +255,7 @@ function applyPriceColorsAlternative(
   const sourceId = 'buildings';
   
   // Set feature state for each building
-  for (const [houseId, data] of priceMap.entries()) {
+  for (const [houseId, data] of Array.from(priceMap.entries())) {
     try {
       map.setFeatureState(
         { source: sourceId, id: houseId },
