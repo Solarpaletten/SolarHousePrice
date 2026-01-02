@@ -1,7 +1,8 @@
 // ============================================================
 // @solar/config - Central Configuration Package
+// Switzerland Edition
 // ============================================================
 // Regions
-export { REGIONS, DEFAULT_REGION, getRegion, getRegionList, getRegionsByCountry, isUSRegion, getOSMQuery, } from './regions';
+export { REGIONS, DEFAULT_REGION, getRegion, getRegionList, getRegionsByCountry, isCHRegion, getOSMQuery, } from './regions';
 // Units & Formatting
-export { SQFT_PER_SQM, SQM_PER_SQFT, sqmToSqft, sqftToSqm, convertArea, pricePerSqmToSqft, pricePerSqftToSqm, formatCurrency, formatArea, formatPricePerUnit, getCurrencySymbol, getAreaUnitLabel, } from './units';
+export { SQFT_PER_SQM, SQM_PER_SQFT, sqmToSqft, sqftToSqm, formatCurrency, formatArea, formatPricePerUnit, getCurrencySymbol, getAreaUnitLabel, formatSwissNumber, formatSwissPriceSqm, } from './units';

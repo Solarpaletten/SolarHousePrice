@@ -1,168 +1,199 @@
-# 📊 Phase 5B — City Price Overlay
+# 🇨🇭 SolarHousePrice — Switzerland
 
-## One-Click Price Visualization
-
----
-
-## 🎯 Overview
-
-Toggle button that instantly colors all buildings by price €/m².
-
-**UX Goal:** "Нажал → город сразу «загорелся» ценами"
+## Real Estate Price Visualization for Monthey (Valais)
 
 ---
 
-## 📁 Files
+## 🏔️ What is this?
+
+A premium 3D map visualization platform showing **real-time property price estimates** for the Swiss canton of Valais, starting with **Monthey**.
+
+The platform displays:
+- 🏠 3D building footprints from OpenStreetMap
+- 💰 Price estimates in **CHF/m²**
+- 🎨 Color-coded price overlay
+- 📊 Click-for-details on any building
+
+---
+
+## 💰 How Prices are Calculated
+
+### Stage A: Aggregation-based Estimation
+
+Prices are calculated using a **transparent, rule-based system**:
 
 ```
-apps/map-core/
-├── app/api/price/bulk/
-│   └── route.ts           # Bulk pricing API
-└── components/map/
-    ├── PriceToggle.tsx    # Toggle button component
-    ├── usePriceOverlay.ts # State management hook
-    └── MapViewIntegration.tsx  # Integration example
+Final Price = Base Price × Type Multiplier × Level Adjustment × Proximity Factors
 ```
+
+### Base Prices (Valais)
+
+| City | Base CHF/m² |
+|------|-------------|
+| Monthey | 7'800 |
+| Martigny | 7'200 |
+| Sion | 8'500 |
+
+### Multipliers
+
+| Factor | Effect |
+|--------|--------|
+| Apartments | +8% |
+| Commercial | +15% |
+| Per extra floor (above 2) | +1.5% |
+| Mountain view | +6% |
+| Near train station | +4% |
+| Near industrial | -10% |
+
+### Confidence Score
+
+Each estimate includes a confidence score (0.55 - 0.90) based on available data.
 
 ---
 
-## 🚀 Installation
+## 🏔️ Why Monthey?
 
-### 1. Copy files to your project:
+| Factor | Status |
+|--------|--------|
+| Entry market | ✅ Affordable compared to Geneva/Zurich |
+| Stable demand | ✅ Growing population |
+| Investor-friendly | ✅ Swiss quality, Valais prices |
+| Mountain access | ✅ Near ski resorts |
+| France border | ✅ Cross-border workers |
+
+---
+
+## 🚀 Quick Start
+
+### 1. Clone & Install
 
 ```bash
-# From solar-monorepo root
-cp -r phase5b/apps/map-core/app/api/price/bulk apps/map-core/app/api/price/
-cp phase5b/apps/map-core/components/map/PriceToggle.tsx apps/map-core/components/map/
-cp phase5b/apps/map-core/components/map/usePriceOverlay.ts apps/map-core/components/map/
+git clone https://github.com/Solarpaletten/SolarHousePrice-CH.git
+cd SolarHousePrice-CH/solar-monorepo
+pnpm install
 ```
 
-### 2. Update your MapView.tsx:
+### 2. Configure Environment
 
-```tsx
-// Add imports
-import { PriceToggle, PriceLegend } from './PriceToggle';
-import { usePriceOverlay } from './usePriceOverlay';
+Create `apps/map-core/.env`:
 
-// Add hook (after map is ready)
-const {
-  enabled: priceOverlayEnabled,
-  loading: priceLoading,
-  buildingsCount,
-  toggle: togglePriceOverlay,
-} = usePriceOverlay(map);
-
-// Add to JSX
-<PriceToggle
-  enabled={priceOverlayEnabled}
-  onToggle={togglePriceOverlay}
-  loading={priceLoading}
-  buildingsCount={buildingsCount}
-/>
+```env
+DATABASE_URL=postgresql://user:pass@host:port/dbname
+NEXT_PUBLIC_MAPBOX_TOKEN=pk.eyJ1...
 ```
 
----
+### 3. Database Setup
 
-## 🔌 API
-
-### GET /api/price/bulk
-
-**Request:**
-```
-GET /api/price/bulk?bbox=13.38,52.51,13.43,52.54
+```bash
+pnpm db:generate
+pnpm db:migrate:dev
 ```
 
-**Response:**
-```json
-{
-  "bbox": [13.38, 52.51, 13.43, 52.54],
-  "prices": [
-    {
-      "house_id": "uuid",
-      "price_sqm": 7200,
-      "confidence": 0.78,
-      "color": "#22c55e"
-    }
-  ],
-  "count": 245,
-  "method": "aggregated",
-  "cached": true,
-  "response_time_ms": 180
-}
+### 4. Import Buildings
+
+```bash
+# Monthey (recommended start)
+pnpm osm:import --city=monthey --limit=500
+
+# Or full area
+pnpm osm:import --city=monthey-full --limit=800
+```
+
+### 5. Run
+
+```bash
+pnpm dev
+# Open http://localhost:3000
 ```
 
 ---
 
-## 🎨 Color Scale
+## 🎨 Price Color Scale
 
-| Price €/m² | Color | Hex |
-|------------|-------|-----|
-| < 5,000 | Blue | #3b82f6 |
-| 5,000-7,000 | Green | #22c55e |
-| 7,000-9,000 | Yellow | #eab308 |
-| 9,000-11,000 | Orange | #f97316 |
-| > 11,000 | Red | #ef4444 |
-
----
-
-## ⚡ Performance
-
-| Metric | Target | Actual |
-|--------|--------|--------|
-| API Response | < 300ms | ~180ms |
-| Max Buildings | 500 | ✅ |
-| Debounce | 400ms | ✅ |
-| Cache TTL | 15 min | ✅ |
+| Color | Range (CHF/m²) | Category |
+|-------|----------------|----------|
+| 🔵 Blue | < 6'000 | Budget |
+| 🟢 Green | 6'000 - 8'000 | Average |
+| 🟡 Yellow | 8'000 - 10'000 | Above Average |
+| 🟠 Orange | 10'000 - 12'000 | Premium |
+| 🔴 Red | > 12'000 | Luxury |
 
 ---
 
-## 🔄 Flow
+## 🗺️ Available Regions
+
+| Region | City | Status |
+|--------|------|--------|
+| `monthey` | Monthey | ✅ Active |
+| `martigny` | Martigny | ✅ Ready |
+| `sion` | Sion | ✅ Ready |
+| `geneva` | Geneva | 🔜 Phase 9 |
+| `zurich` | Zurich | 🔜 Phase 10 |
+
+---
+
+## 📁 Project Structure
 
 ```
-User clicks € button
-       │
-       ▼
-  Toggle ON
-       │
-       ▼
-Fetch /api/price/bulk?bbox=...
-       │
-       ▼
-Build priceMap (id → price, color)
-       │
-       ▼
-Apply Mapbox setPaintProperty()
-       │
-       ▼
-Buildings colored! 🎨
-       │
-       ▼
-On map move (debounced) → refetch
+solar-monorepo/
+├── apps/
+│   └── map-core/          # Main map application
+├── packages/
+│   ├── config/            # Region configurations
+│   ├── db/                # Prisma + PostgreSQL
+│   ├── geo/               # OSM import tools
+│   └── pricing/           # Price estimation engine
+└── docs/
 ```
 
 ---
 
-## ✅ Checklist
+## 🛠️ Commands
 
-- [x] Toggle button (€)
-- [x] Bulk API endpoint
-- [x] Price color mapping
-- [x] Debounced map updates
-- [x] In-memory cache
-- [x] Popup integration
-- [x] Legend component
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start dev server |
+| `pnpm build` | Production build |
+| `pnpm osm:import --city=monthey` | Import buildings |
+| `pnpm db:studio` | Open Prisma Studio |
 
 ---
 
-## 🚫 Not Included (Future)
+## 📊 Roadmap
 
-- ML predictions (Stage B)
-- Filter by price range
-- Save overlay state
-- Export to PDF
+- [x] **Phase 7**: Monthey MVP
+- [ ] **Phase 8**: ML-based pricing
+- [ ] **Phase 9**: Geneva / Zurich
+- [ ] **Phase 10**: Investor dashboard
+
+---
+
+## ⚠️ Disclaimer
+
+> **This is an estimation tool, not an official appraisal.**
+> 
+> Price estimates are based on aggregated market data and statistical models. 
+> For legal property valuations, consult a certified Swiss real estate appraiser.
+
+---
+
+## 👥 Team
+
+- **Leanid** — Architect
+- **Dashka** — Senior / PM  
+- **Claude** — AI Engineer
 
 ---
 
 ## 📜 License
 
-MIT © Solarpaletten
+MIT © Solarpaletten 2026
+
+---
+
+## 🔗 Links
+
+- **Production**: Coming soon
+- **GitHub**: https://github.com/Solarpaletten/SolarHousePrice-CH
+- **Berlin Version**: https://github.com/Solarpaletten/SolarHousePrice
+- **Florida Version**: https://github.com/Solarpaletten/SolarHousePrice-USA

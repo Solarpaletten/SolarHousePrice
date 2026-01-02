@@ -12,11 +12,11 @@ import {
 import type { HouseFeatureCollection, HouseDetailResponse, PopupData } from './types';
 
 // ============================================================
-// CONFIGURATION - FLORIDA (SARASOTA)
+// CONFIGURATION - SWITZERLAND (MONTHEY)
 // ============================================================
 
-// Start position: Sarasota, Florida
-const DEFAULT_CENTER: [number, number] = [-82.5307, 27.3364];
+// Start position: Monthey, Valais
+const DEFAULT_CENTER: [number, number] = [6.954, 46.255];
 const DEFAULT_ZOOM = 14;
 const MIN_ZOOM_FOR_HOUSES = 13;
 
@@ -261,7 +261,7 @@ export function useMapbox({
       
       if (!props?.id) return;
 
-      // Parse address from properties (it's stringified in GeoJSON)
+      // Parse address from properties
       let address = 'Address unknown';
       try {
         const addressObj = typeof props.address === 'string' 
