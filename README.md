@@ -30,3 +30,5 @@ Location-first real estate platform for Germany.
 ## Status
 
 🟡 Phase 0 — Documentation & Architecture Lock
+
+git commit -m "fix: add packageManager for Vercel"
