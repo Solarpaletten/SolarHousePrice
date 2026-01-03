@@ -72,7 +72,7 @@ function RegionButton({ region, isActive, onClick }: RegionButtonProps) {
           ? '0 4px 12px rgba(37, 99, 235, 0.4)' 
           : '0 2px 6px rgba(0, 0, 0, 0.1)',
       }}
-      title={`${region.city}, ${region.state || region.country}`}
+      title={`${region.city}, ${region.canton || region.country}`}
     >
       <span style={{ fontSize: '16px' }}>{region.flag}</span>
       <span>{region.label}</span>
